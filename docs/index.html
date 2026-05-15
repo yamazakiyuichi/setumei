@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLMの仕組みをゼロから学ぶ</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card: #1a1d27;
+      --accent: #6c63ff;
+      --accent2: #ff6584;
+      --text: #e8eaf0;
+      --muted: #8b92a8;
+      --border: #2d3148;
+      --code: #282c3e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #0f1117 0%, #1a1440 60%, #0d1f3c 100%);
+      padding: 64px 24px 48px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(108,99,255,0.18), transparent);
+      pointer-events: none;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(108,99,255,0.15);
+      border: 1px solid rgba(108,99,255,0.4);
+      color: #a89eff;
+      font-size: 0.78rem;
+      padding: 4px 14px;
+      border-radius: 100px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(1.8rem, 5vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 14px;
+      background: linear-gradient(135deg, #fff 30%, #a89eff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 580px;
+      margin: 0 auto 28px;
+    }
+    .tech-pills {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .pill {
+      background: var(--code);
+      border: 1px solid var(--border);
+      color: #a89eff;
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* ── Pipeline ── */
+    .pipeline {
+      max-width: 900px;
+      margin: 48px auto;
+      padding: 0 24px;
+    }
+    .pipeline h2 {
+      text-align: center;
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 24px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .pipe-steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .pipe-step {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 18px;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+    .pipe-step .label { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .pipe-step .val   { color: #a89eff; font-family: monospace; margin-top: 2px; }
+    .pipe-arrow { color: var(--accent); font-size: 1.4rem; padding: 0 4px; }
+
+    /* ── Cards ── */
+    .section {
+      max-width: 900px;
+      margin: 0 auto 64px;
+      padding: 0 24px;
+    }
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--stripe, var(--accent));
+      border-radius: 14px 14px 0 0;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(108,99,255,0.15);
+    }
+    .card-num {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .card-sub {
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .card-body {
+      font-size: 0.9rem;
+      color: #b0b8cc;
+    }
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: auto;
+    }
+    .tag {
+      background: rgba(108,99,255,0.1);
+      border: 1px solid rgba(108,99,255,0.25);
+      color: #a89eff;
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-family: 'SF Mono', monospace;
+    }
+    .card-cta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .card-cta span { font-size: 0.82rem; color: var(--muted); }
+    .card-cta .arrow { color: var(--accent); font-size: 1.1rem; }
+
+    /* Colors per card */
+    .card:nth-child(1) { --stripe: #6c63ff; }
+    .card:nth-child(2) { --stripe: #ff6584; }
+    .card:nth-child(3) { --stripe: #43b89c; }
+    .card:nth-child(4) { --stripe: #f6a623; }
+
+    /* ── Feature grid ── */
+    .features {
+      max-width: 900px;
+      margin: 0 auto 64px;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .feat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .feat-icon { font-size: 1.6rem; margin-bottom: 8px; }
+    .feat-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .feat-desc { font-size: 0.82rem; color: var(--muted); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    footer a { color: #a89eff; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      .cards { grid-template-columns: 1fr; }
+      .pipe-steps { flex-direction: column; }
+      .pipe-arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Hero -->
+<header class="hero">
+  <div class="badge">Educational Resource · numpy only</div>
+  <h1>LLMの仕組みをゼロから学ぶ</h1>
+  <p>行列計算から始め、Transformer の全内部動作を<br>実際の数値で手計算しながら理解する Jupyter Notebook 教材</p>
+  <div class="tech-pills">
+    <span class="pill">Python 3</span>
+    <span class="pill">numpy</span>
+    <span class="pill">matplotlib</span>
+    <span class="pill">Self-Attention</span>
+    <span class="pill">Transformer</span>
+    <span class="pill">GPT</span>
+  </div>
+</header>
+
+<!-- Pipeline -->
+<div class="pipeline">
+  <h2>変換パイプライン</h2>
+  <div class="pipe-steps">
+    <div class="pipe-step"><div class="label">テキスト</div><div class="val">"hello"</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="label">Token IDs</div><div class="val">[7,4,11]</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="label">Embedding</div><div class="val">(L, d_model)</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="label">Attention</div><div class="val">QK^T/√d_k</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="label">Transformer×N</div><div class="val">LN+FFN+残差</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="label">生成</div><div class="val">softmax → token</div></div>
+  </div>
+</div>
+
+<!-- Notebooks -->
+<section class="section">
+  <h2 class="section-title">📚 ノートブック</h2>
+  <div class="cards">
+
+    <a class="card" href="01_tokenization_embedding.html">
+      <div>
+        <div class="card-num">Notebook 01</div>
+        <div class="card-title">トークン化と埋め込み</div>
+        <div class="card-sub">テキストを数値に変換する仕組み</div>
+      </div>
+      <div class="card-body">
+        文字レベルのトークン化・BPE の直感・Embedding テーブルのルックアップ・
+        正弦波 Positional Encoding を数値で確認。
+        最終的な入力行列 X を構築します。
+      </div>
+      <div class="card-tags">
+        <span class="tag">Tokenization</span>
+        <span class="tag">BPE</span>
+        <span class="tag">Embedding</span>
+        <span class="tag">Positional Encoding</span>
+      </div>
+      <div class="card-cta">
+        <span>numpy · matplotlib · 図4枚</span>
+        <span class="arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card" href="02_self_attention.html">
+      <div>
+        <div class="card-num">Notebook 02</div>
+        <div class="card-title">Self-Attention</div>
+        <div class="card-sub">Transformer の心臓部を数値で追う</div>
+      </div>
+      <div class="card-body">
+        Q/K/V 行列の生成・Scaled Dot-Product Attention を 5 ステップで手計算・
+        Causal Mask・Multi-Head Attention。全中間行列を可視化します。
+      </div>
+      <div class="card-tags">
+        <span class="tag">Q/K/V</span>
+        <span class="tag">Scaled Attention</span>
+        <span class="tag">Causal Mask</span>
+        <span class="tag">Multi-Head</span>
+      </div>
+      <div class="card-cta">
+        <span>Attention ヒートマップ · 図3枚</span>
+        <span class="arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card" href="03_transformer_block.html">
+      <div>
+        <div class="card-num">Notebook 03</div>
+        <div class="card-title">Transformer ブロック</div>
+        <div class="card-sub">Attention の前後に何が付くか</div>
+      </div>
+      <div class="card-body">
+        Layer Normalization・残差接続・GELU FFN・N 層スタック・
+        LM Head。各層で行列がどう変化するかを全ステップで可視化します。
+      </div>
+      <div class="card-tags">
+        <span class="tag">LayerNorm</span>
+        <span class="tag">Residual</span>
+        <span class="tag">GELU</span>
+        <span class="tag">FFN</span>
+        <span class="tag">N-Layer</span>
+      </div>
+      <div class="card-cta">
+        <span>情報フロー図 · 図5枚</span>
+        <span class="arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card" href="04_training_inference.html">
+      <div>
+        <div class="card-num">Notebook 04</div>
+        <div class="card-title">学習と推論</div>
+        <div class="card-sub">モデルを鍛え、テキストを生み出す</div>
+      </div>
+      <div class="card-body">
+        Cross-Entropy 損失・数値微分で勾配を体感・SGD 更新・
+        自己回帰テキスト生成・Temperature / Top-k サンプリングの比較。
+      </div>
+      <div class="card-tags">
+        <span class="tag">Cross-Entropy</span>
+        <span class="tag">Backprop</span>
+        <span class="tag">SGD</span>
+        <span class="tag">Text Generation</span>
+        <span class="tag">Temperature</span>
+      </div>
+      <div class="card-cta">
+        <span>学習曲線 · 生成ステップ図 · 図5枚</span>
+        <span class="arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- Features -->
+<div class="features">
+  <div class="feat">
+    <div class="feat-icon">🔢</div>
+    <div class="feat-title">全数値が見える</div>
+    <div class="feat-desc">d_model=4, seq_len=4 で全行列が画面に収まります</div>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">✏️</div>
+    <div class="feat-title">手計算の確認</div>
+    <div class="feat-desc">各ステップを要素レベルで手計算して結果を照合</div>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">📊</div>
+    <div class="feat-title">豊富な可視化</div>
+    <div class="feat-desc">Attention ヒートマップ・学習曲線など 20+ 枚の図</div>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">📦</div>
+    <div class="feat-title">numpy のみ</div>
+    <div class="feat-desc">PyTorch 不要。pip install numpy だけで動く</div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <p>
+    参考文献: Vaswani et al. (2017) "Attention Is All You Need" ·
+    <a href="https://github.com/karpathy/nanoGPT" target="_blank">nanoGPT by Karpathy</a>
+  </p>
+  <p style="margin-top:8px; color:#555;">Built with Jupyter · numpy · matplotlib</p>
+</footer>
+
+</body>
+</html>
