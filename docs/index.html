@@ -17,17 +17,19 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+                   "Yu Gothic", "Hiragino Sans", sans-serif;
       background: var(--bg);
       color: var(--text);
       line-height: 1.65;
       min-height: 100vh;
+      -webkit-text-size-adjust: 100%;
     }
 
     /* ── Hero ── */
     .hero {
       background: linear-gradient(135deg, #0f1117 0%, #1a1440 60%, #0d1f3c 100%);
-      padding: 64px 24px 48px;
+      padding: 48px 16px 36px;
       text-align: center;
       border-bottom: 1px solid var(--border);
       position: relative;
@@ -87,8 +89,8 @@
     /* ── Pipeline ── */
     .pipeline {
       max-width: 900px;
-      margin: 48px auto;
-      padding: 0 24px;
+      margin: 36px auto;
+      padding: 0 16px;
     }
     .pipeline h2 {
       text-align: center;
@@ -102,7 +104,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0;
       flex-wrap: wrap;
       gap: 4px;
     }
@@ -110,24 +111,24 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 12px 18px;
+      padding: 10px 14px;
       text-align: center;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
     }
-    .pipe-step .label { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; }
-    .pipe-step .val   { color: #a89eff; font-family: monospace; margin-top: 2px; }
-    .pipe-arrow { color: var(--accent); font-size: 1.4rem; padding: 0 4px; }
+    .pipe-step .label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .pipe-step .val   { color: #a89eff; font-family: monospace; margin-top: 2px; font-size: 0.78rem; }
+    .pipe-arrow { color: var(--accent); font-size: 1.2rem; padding: 0 2px; }
 
     /* ── Cards ── */
     .section {
       max-width: 900px;
-      margin: 0 auto 64px;
-      padding: 0 24px;
+      margin: 0 auto 48px;
+      padding: 0 16px;
     }
     .section-title {
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       font-weight: 700;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -140,22 +141,23 @@
     }
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+      gap: 16px;
     }
     .card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 28px;
+      padding: 20px 18px;
       text-decoration: none;
       color: inherit;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
       transition: border-color .2s, transform .2s, box-shadow .2s;
       position: relative;
       overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
     }
     .card::before {
       content: '';
@@ -225,11 +227,11 @@
     /* ── Feature grid ── */
     .features {
       max-width: 900px;
-      margin: 0 auto 64px;
-      padding: 0 24px;
+      margin: 0 auto 48px;
+      padding: 0 16px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+      gap: 12px;
     }
     .feat {
       background: var(--card);
@@ -253,9 +255,22 @@
     footer a:hover { text-decoration: underline; }
 
     @media (max-width: 600px) {
-      .cards { grid-template-columns: 1fr; }
-      .pipe-steps { flex-direction: column; }
-      .pipe-arrow { transform: rotate(90deg); }
+      .hero { padding: 32px 14px 28px; }
+      .hero h1 { font-size: 1.6rem; }
+      .hero p  { font-size: 0.92rem; }
+      .badge   { font-size: 0.7rem; }
+      .cards   { grid-template-columns: 1fr; }
+      .card-title { font-size: 1.05rem; }
+      .card-body  { font-size: 0.84rem; }
+      .pipeline   { margin: 28px auto; }
+      .pipe-steps { flex-direction: column; align-items: stretch; }
+      .pipe-step  { padding: 8px 14px; }
+      .pipe-arrow { transform: rotate(90deg); align-self: center; }
+      .features   { grid-template-columns: 1fr 1fr; }
+      .feat { padding: 14px; }
+      .feat-title { font-size: 0.88rem; }
+      .feat-desc  { font-size: 0.76rem; }
+      footer { font-size: 0.8rem; padding: 24px 14px; }
     }
   </style>
 </head>
